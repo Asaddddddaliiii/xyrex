@@ -43,54 +43,61 @@ export interface ThoughtAnalysis {
   supportMessage?: string;
 }
 
+async function safeRequest(body: any) {
+  const response = await fetch("/api/analyze", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  const text = await response.text();
+
+  if (!response.ok) {
+    throw new Error(text || "Server error");
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    throw new Error("Invalid JSON from server: " + text);
+  }
+}
+
 export const geminiService = {
   async analyzeThought(thought: string): Promise<ThoughtAnalysis> {
-    const response = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'thought', input: thought }),
-    });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Analysis failed');
-    }
-    return response.json();
+    return safeRequest({ type: "thought", input: thought });
   },
 
-  async analyzeDecision(question: string, providedOptions?: string[]): Promise<DecisionAnalysis> {
-    const response = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'decision', input: question, options: providedOptions }),
+  async analyzeDecision(
+    question: string,
+    providedOptions?: string[]
+  ): Promise<DecisionAnalysis> {
+    return safeRequest({
+      type: "decision",
+      input: question,
+      options: providedOptions,
     });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Analysis failed');
-    }
-    return response.json();
   },
 
   async analyzeProblem(description: string): Promise<ProblemAnalysis> {
-    const response = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'problem', input: description }),
+    return safeRequest({
+      type: "problem",
+      input: description,
     });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Analysis failed');
-    }
-    return response.json();
   },
 
   async clarifyInput(input: string): Promise<string> {
-    const response = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'clarify', input }),
-    });
-    if (!response.ok) return input;
-    const data = await response.json();
-    return data.text || input;
+    try {
+      const data = await safeRequest({
+        type: "clarify",
+        input,
+      });
+
+      return data?.text || input;
+    } catch {
+      return input;
+    }
   },
 };
