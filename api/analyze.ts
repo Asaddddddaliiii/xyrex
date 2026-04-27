@@ -1,7 +1,9 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const apiKey = process.env.GEMINI_API_KEY;
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+const ai = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+
+/* ---------------- MAIN HANDLER ---------------- */
 
 export default async function handler(req: any, res: any) {
   if (req.method !== "POST") {
@@ -44,58 +46,71 @@ export default async function handler(req: any, res: any) {
 
 function safeParse(text: string | undefined) {
   if (!text) return {};
+
   try {
-    return JSON.parse(text);
+    const cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    return JSON.parse(cleaned);
   } catch {
     return {};
   }
 }
 
+/* ---------------- GEMINI MODEL ---------------- */
+
+function getModel() {
+  if (!ai) throw new Error("AI not initialized");
+  return ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+}
+
 /* ---------------- THOUGHT ---------------- */
 
 async function analyzeThought(thought: string) {
-  const res = await ai!.models.generateContent({
-    model: "gemini-1.5-flash",
-    contents: `Return ONLY valid JSON:
-${thought}`,
-  });
+  const model = getModel();
 
-  return safeParse(res.text);
+  const res = await model.generateContent(
+    `Return ONLY valid JSON:
+Thought: ${thought}`
+  );
+
+  return safeParse(res.response.text());
 }
 
 /* ---------------- DECISION ---------------- */
 
 async function analyzeDecision(question: string, options?: string[]) {
-  const res = await ai!.models.generateContent({
-    model: "gemini-1.5-flash",
-    contents: `Return ONLY valid JSON:
-Decision: ${question}
-Options: ${options?.join(", ") || "none"}`,
-  });
+  const model = getModel();
 
-  return safeParse(res.text);
+  const res = await model.generateContent(
+    `Return ONLY valid JSON:
+Decision: ${question}
+Options: ${options?.join(", ") || "none"}`
+  );
+
+  return safeParse(res.response.text());
 }
 
 /* ---------------- PROBLEM ---------------- */
 
 async function analyzeProblem(description: string) {
-  const res = await ai!.models.generateContent({
-    model: "gemini-1.5-flash",
-    contents: `Return ONLY valid JSON:
-Problem: ${description}`,
-  });
+  const model = getModel();
 
-  return safeParse(res.text);
+  const res = await model.generateContent(
+    `Return ONLY valid JSON:
+Problem: ${description}`
+  );
+
+  return safeParse(res.response.text());
 }
 
 /* ---------------- CLARIFY ---------------- */
 
 async function clarifyInput(input: string) {
-  const res = await ai!.models.generateContent({
-    model: "gemini-1.5-flash",
-    contents: `Return ONLY valid JSON:
-${input}`,
-  });
+  const model = getModel();
 
-  return safeParse(res.text);
+  const res = await model.generateContent(
+    `Return ONLY valid JSON:
+${input}`
+  );
+
+  return { text: res.response.text() || input };
 }
