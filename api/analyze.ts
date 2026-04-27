@@ -8,7 +8,244 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method Not Allowed. Use POST.' });
   }
 
+  if (!ai) {import { GoogleGenAI, Type } from "@google/genai";
+
+const apiKey = process.env.GEMINI_API_KEY;
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+
+export default async function handler(req: any, res: any) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed. Use POST.' });
+  }
+
   if (!ai) {
+    return res.status(500).json({ error: 'GEMINI_API_KEY is not configured on the server.' });
+  }
+
+  const { type, input, options } = req.body;
+
+  if (!input) {
+    return res.status(400).json({ error: 'Missing input content' });
+  }
+
+  try {
+    let result;
+
+    switch (type) {
+      case 'thought':
+        result = await analyzeThought(input);
+        break;
+      case 'decision':
+        result = await analyzeDecision(input, options);
+        break;
+      case 'problem':
+        result = await analyzeProblem(input);
+        break;
+      case 'clarify':
+        result = await clarifyInput(input);
+        break;
+      default:
+        return res.status(400).json({ error: 'Invalid analysis type requested' });
+    }
+
+    res.status(200).json(result);
+  } catch (error: any) {
+    console.error('Gemini API Error:', error);
+    res.status(500).json({ error: error.message || 'Analysis failed in production' });
+  }
+}
+
+/* ===================== THOUGHT ===================== */
+
+async function analyzeThought(thought: string) {
+  if (!ai) throw new Error("AI not initialized");
+
+  const prompt = `
+Thought: "${thought}"
+You are a thinking companion—human, calm, thoughtful, and supportive.
+
+Return structured JSON only.
+`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-1.5-flash-001",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      maxOutputTokens: 2048,
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          openingLine: { type: Type.STRING },
+          collaborativeFraming: { type: Type.STRING },
+          analysis: { type: Type.STRING },
+          outcomes: { type: Type.ARRAY, items: { type: Type.STRING } },
+          risks: { type: Type.ARRAY, items: { type: Type.STRING } },
+          longTermImpact: { type: Type.STRING },
+          reflectionQuestions: { type: Type.ARRAY, items: { type: Type.STRING } },
+          insightLayer: { type: Type.STRING },
+          interpretationLayer: { type: Type.STRING },
+          reflectiveQuestion: { type: Type.STRING },
+          isHarmful: { type: Type.BOOLEAN },
+          supportMessage: { type: Type.STRING },
+        },
+        required: [
+          "openingLine",
+          "collaborativeFraming",
+          "analysis",
+          "outcomes",
+          "risks",
+          "longTermImpact",
+          "reflectionQuestions",
+          "insightLayer",
+          "interpretationLayer",
+          "reflectiveQuestion",
+          "isHarmful"
+        ],
+      },
+    },
+  });
+
+  return safeParse(response.text);
+}
+
+/* ===================== DECISION ===================== */
+
+async function analyzeDecision(question: string, providedOptions?: string[]) {
+  if (!ai) throw new Error("AI not initialized");
+
+  const prompt = `
+Decision: "${question}"
+Options: ${providedOptions?.length ? providedOptions.join(", ") : "None provided"}
+Return structured JSON only.
+`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-1.5-flash-001",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      maxOutputTokens: 2048,
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          openingLine: { type: Type.STRING },
+          collaborativeFraming: { type: Type.STRING },
+          options: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                title: { type: Type.STRING },
+                pros: { type: Type.ARRAY, items: { type: Type.STRING } },
+                cons: { type: Type.ARRAY, items: { type: Type.STRING } },
+              },
+              required: ["title", "pros", "cons"],
+            },
+          },
+          tradeOffs: { type: Type.STRING },
+          insightLayer: { type: Type.STRING },
+          interpretationLayer: { type: Type.STRING },
+          reflectiveQuestion: { type: Type.STRING },
+        },
+        required: [
+          "openingLine",
+          "collaborativeFraming",
+          "options",
+          "tradeOffs",
+          "insightLayer",
+          "interpretationLayer",
+          "reflectiveQuestion"
+        ],
+      },
+    },
+  });
+
+  return safeParse(response.text);
+}
+
+/* ===================== PROBLEM ===================== */
+
+async function analyzeProblem(description: string) {
+  if (!ai) throw new Error("AI not initialized");
+
+  const prompt = `
+Problem: "${description}"
+Return structured JSON only.
+`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-1.5-flash-001",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      maxOutputTokens: 2048,
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          openingLine: { type: Type.STRING },
+          collaborativeFraming: { type: Type.STRING },
+          rootCauses: { type: Type.ARRAY, items: { type: Type.STRING } },
+          solutions: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                title: { type: Type.STRING },
+                pros: { type: Type.ARRAY, items: { type: Type.STRING } },
+                cons: { type: Type.ARRAY, items: { type: Type.STRING } },
+                difficulty: { type: Type.STRING },
+              },
+              required: ["title", "pros", "cons", "difficulty"],
+            },
+          },
+          stepByStepPlan: { type: Type.ARRAY, items: { type: Type.STRING } },
+          insightLayer: { type: Type.STRING },
+          interpretationLayer: { type: Type.STRING },
+          reflectiveQuestion: { type: Type.STRING },
+        },
+        required: [
+          "openingLine",
+          "collaborativeFraming",
+          "rootCauses",
+          "solutions",
+          "stepByStepPlan",
+          "insightLayer",
+          "interpretationLayer",
+          "reflectiveQuestion"
+        ],
+      },
+    },
+  });
+
+  return safeParse(response.text);
+}
+
+/* ===================== CLARIFY ===================== */
+
+async function clarifyInput(input: string) {
+  if (!ai) throw new Error("AI not initialized");
+
+  const response = await ai.models.generateContent({
+    model: "gemini-1.5-flash-001",
+    contents: `Clarify: "${input}"`,
+  });
+
+  return { text: response.text || input };
+}
+
+/* ===================== SAFE PARSE ===================== */
+
+function safeParse(text: string | undefined): any {
+  if (!text) return {};
+  try {
+    const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    return JSON.parse(cleanText);
+  } catch (e) {
+    console.error("JSON Parse Error:", e);
+    return {};
+  }
+}
     return res.status(500).json({ error: 'GEMINI_API_KEY is not configured on the server.' });
   }
 
