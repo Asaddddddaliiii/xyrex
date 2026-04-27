@@ -55,7 +55,7 @@ function safeParse(text: string | undefined) {
 
 async function analyzeThought(thought: string) {
   const res = await ai!.models.generateContent({
-    model: "gemini-1.5-flash-001",
+    model: "gemini-1.5-flash",
     contents: `Return ONLY valid JSON:
 ${thought}`,
   });
@@ -67,7 +67,7 @@ ${thought}`,
 
 async function analyzeDecision(question: string, options?: string[]) {
   const res = await ai!.models.generateContent({
-    model: "gemini-1.5-flash-001",
+    model: "gemini-1.5-flash",
     contents: `Return ONLY valid JSON:
 Decision: ${question}
 Options: ${options?.join(", ") || "none"}`,
@@ -80,7 +80,7 @@ Options: ${options?.join(", ") || "none"}`,
 
 async function analyzeProblem(description: string) {
   const res = await ai!.models.generateContent({
-    model: "gemini-1.5-flash-001",
+    model: "gemini-1.5-flash",
     contents: `Return ONLY valid JSON:
 Problem: ${description}`,
   });
@@ -92,7 +92,7 @@ Problem: ${description}`,
 
 async function clarifyInput(input: string) {
   const res = await ai!.models.generateContent({
-    model: "gemini-1.5-flash-001",
+    model: "gemini-1.5-flash",
     contents: `Return ONLY valid JSON:
 ${input}`,
   });
