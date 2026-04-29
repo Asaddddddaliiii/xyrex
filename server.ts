@@ -36,7 +36,7 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get("*", (req, res) => {
+    app.get("*all", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   }
@@ -46,4 +46,8 @@ async function startServer() {
   });
 }
 
-startServer();
+await startServer().catch((err) => {
+  console.error("Critical error during server startup:", err);
+  process.exit(1);
+});
+
