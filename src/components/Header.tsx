@@ -7,7 +7,7 @@ export const Header = () => {
       <div className="max-w-7xl w-full flex items-center justify-between">
         <div className="flex items-center gap-2 md:gap-3">
           <img 
-            src="/images/logo.png" 
+            src="/logo.png" 
             className="w-[45px] h-[45px] md:w-[90px] md:h-[90px] object-contain flex-shrink-0 shadow-sm" 
             alt="Xyrex Logo" 
             referrerPolicy="no-referrer" 
