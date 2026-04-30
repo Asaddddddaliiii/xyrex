@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import logo from '../assets/logo.png';
 
 export const Header = () => {
   return (
@@ -7,7 +8,7 @@ export const Header = () => {
       <div className="max-w-7xl w-full flex items-center justify-between">
         <div className="flex items-center gap-2 md:gap-3">
           <img 
-            src="/logo.png" 
+            src={logo} 
             className="w-[45px] h-[45px] md:w-[90px] md:h-[90px] object-contain flex-shrink-0 shadow-sm" 
             alt="Xyrex Logo" 
             referrerPolicy="no-referrer" 
