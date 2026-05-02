@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { logoBase64 } from '../assets/logo-b64';
 
 export const Header = () => {
   return (
@@ -7,9 +8,14 @@ export const Header = () => {
       <div className="max-w-7xl w-full flex items-center justify-between">
         <div className="flex items-center gap-2 md:gap-3">
           <img 
-            src="https://via.placeholder.com/150?text=XYREX" 
+            src={logoBase64} 
             className="w-[45px] h-[45px] md:w-[90px] md:h-[90px] object-contain flex-shrink-0 shadow-sm" 
             alt="Xyrex Logo" 
+            loading="eager"
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              console.error("Logo failed to load (base64 fallback failed):", e);
+            }}
           />
           <Link 
             to="/" 
