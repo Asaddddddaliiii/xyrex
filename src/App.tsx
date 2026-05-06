@@ -109,6 +109,8 @@ const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
 
 const Sidebar = ({ onLogout }: { onLogout: () => void }) => {
   const location = useLocation();
+  const [isHovered, setIsHovered] = useState(false);
+
   const navItems = [
     { path: "/decision", label: "Decision", icon: Brain },
     { path: "/problem", label: "Problem", icon: MessageSquare },
@@ -120,24 +122,52 @@ const Sidebar = ({ onLogout }: { onLogout: () => void }) => {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="fixed left-0 top-[120px] bottom-0 w-26 xl:w-64 bg-background border-r border-border z-40 hidden md:flex flex-col p-4">
+      <motion.aside 
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        initial={false}
+        animate={{ 
+          width: isHovered ? 260 : 80,
+        }}
+        transition={{ 
+          type: "tween", 
+          ease: "circOut", 
+          duration: 0.3 
+        }}
+        className="fixed left-0 top-[120px] bottom-0 bg-background border-r border-border z-40 hidden md:flex flex-col p-3 overflow-hidden shadow-sm"
+      >
         <nav className="flex-grow space-y-2">
           {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
               className={cn(
-                "flex items-center gap-4 p-3 rounded-2xl transition-all duration-200 group",
+                "flex items-center gap-4 p-3 rounded-2xl transition-colors duration-200 group relative whitespace-nowrap overflow-hidden",
                 location.pathname.startsWith(item.path) 
-                  ? "bg-foreground text-background font-bold" 
+                  ? "bg-foreground text-background font-bold shadow-md" 
                   : "hover:bg-card text-muted hover:text-foreground"
               )}
             >
-              <item.icon size={24} className={cn(
-                "transition-transform group-hover:scale-110",
-                location.pathname.startsWith(item.path) ? "text-background" : "text-muted group-hover:text-foreground"
-              )} />
-              <span className="text-lg hidden xl:inline">{item.label}</span>
+              <div className="min-w-[24px] flex items-center justify-center">
+                <item.icon size={22} className={cn(
+                  "transition-transform duration-300 group-hover:scale-110",
+                  location.pathname.startsWith(item.path) ? "text-background" : "text-muted group-hover:text-foreground"
+                )} />
+              </div>
+              <motion.span 
+                initial={false}
+                animate={{ 
+                  opacity: isHovered ? 1 : 0,
+                  x: isHovered ? 0 : -10,
+                }}
+                transition={{ 
+                  duration: 0.2,
+                  delay: isHovered ? 0.1 : 0
+                }}
+                className="text-base tracking-tight"
+              >
+                {item.label}
+              </motion.span>
             </Link>
           ))}
         </nav>
@@ -145,13 +175,28 @@ const Sidebar = ({ onLogout }: { onLogout: () => void }) => {
         <div className="mt-auto">
           <button
             onClick={onLogout}
-            className="flex items-center gap-4 p-3 rounded-2xl w-full text-muted hover:text-foreground hover:bg-card transition-all group"
+            className="flex items-center gap-4 p-3 rounded-2xl w-full text-muted hover:text-foreground hover:bg-card transition-colors duration-200 group whitespace-nowrap overflow-hidden"
           >
-            <LogOut size={24} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-lg hidden xl:inline text-left">Logout</span>
+            <div className="min-w-[24px] flex items-center justify-center">
+              <LogOut size={22} className="group-hover:-translate-x-1 transition-transform duration-300" />
+            </div>
+            <motion.span 
+              initial={false}
+              animate={{ 
+                opacity: isHovered ? 1 : 0,
+                x: isHovered ? 0 : -10,
+              }}
+              transition={{ 
+                duration: 0.2,
+                delay: isHovered ? 0.1 : 0
+              }}
+              className="text-base tracking-tight text-left"
+            >
+              Logout
+            </motion.span>
           </button>
         </div>
-      </aside>
+      </motion.aside>
 
       {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-md border-t border-border z-40 flex md:hidden items-center justify-around px-2">
@@ -244,7 +289,7 @@ export default function App() {
         <Header />
         <div className="flex flex-col md:flex-row flex-grow">
           <Sidebar onLogout={handleLogout} />
-          <main className="flex-grow md:pl-26 xl:pl-64 pt-[92px] md:pt-[136px] pb-16 md:pb-0">
+          <main className="flex-grow md:pl-20 pt-[92px] md:pt-[136px] pb-16 md:pb-0">
             <Routes>
               <Route path="/" element={<Navigate to="/explore" replace />} />
               <Route path="/decision" element={<DecisionPage />} />
