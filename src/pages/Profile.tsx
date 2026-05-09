@@ -21,7 +21,6 @@ interface UserProfile {
   stats: {
     totalDecisions: number;
     totalProblems: number;
-    successRate: number;
     communityAgreement: number;
   };
 }
@@ -230,7 +229,6 @@ export const ProfilePage = () => {
   const stats = [
     { label: "Total Decisions", value: profile.stats.totalDecisions, icon: Brain },
     { label: "Total Problems", value: profile.stats.totalProblems || 0, icon: MessageSquare },
-    { label: "Success Rate", value: `${profile.stats.successRate}%`, icon: CheckCircle2 },
   ];
 
   return (
@@ -335,15 +333,16 @@ export const ProfilePage = () => {
         </div>
       </header>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 gap-3 md:gap-4">
         {stats.map((stat, i) => (
           <div key={i} className={cn(
-            "card p-4 space-y-1 md:space-y-2 text-center md:text-left",
-            i === 2 && "col-span-2 md:col-span-1"
+            "card p-6 text-center flex flex-col items-center justify-center min-h-[140px] space-y-3"
           )}>
-            <stat.icon size={18} className="text-muted mx-auto md:mx-0" />
-            <div className="text-xl md:text-2xl font-display font-bold">{stat.value}</div>
-            <div className="text-[9px] md:text-[10px] text-muted uppercase font-bold tracking-wider">{stat.label}</div>
+            <stat.icon size={22} className="text-muted/80" />
+            <div className="flex flex-col items-center space-y-1">
+              <div className="text-3xl md:text-4xl font-display font-bold leading-none tracking-tight">{stat.value}</div>
+              <div className="text-[10px] md:text-xs text-muted font-bold uppercase tracking-[0.15em] pt-1">{stat.label}</div>
+            </div>
           </div>
         ))}
       </div>

@@ -19,7 +19,6 @@
           "properties": {
             "totalDecisions": { "type": "number" },
             "totalProblems": { "type": "number" },
-            "successRate": { "type": "number" },
             "communityAgreement": { "type": "number" }
           }
         }

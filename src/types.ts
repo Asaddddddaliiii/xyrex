@@ -13,7 +13,6 @@ export interface UserProfile {
   stats: {
     totalDecisions: number;
     totalProblems: number;
-    successRate: number;
     communityAgreement: number;
   };
 }

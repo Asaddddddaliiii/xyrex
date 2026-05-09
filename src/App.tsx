@@ -245,7 +245,6 @@ export default function App() {
               stats: {
                 totalDecisions: 0,
                 totalProblems: 0,
-                successRate: 0,
                 communityAgreement: 0
               }
             });
