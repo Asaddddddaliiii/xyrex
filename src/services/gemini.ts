@@ -45,24 +45,22 @@ export interface ThoughtAnalysis {
   supportMessage?: string;
 }
 
+const MODEL_NAME = "gemini-3-flash-preview";
+
 const getAI = () => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
-    // Note: In AI Studio, GEMINI_API_KEY is usually injected.
-    // If it's missing, we inform the user to check their Secrets.
-    throw new Error("GEMINI_API_KEY is not configured. Please add it to Settings -> Secrets.");
+    throw new Error("GEMINI_API_KEY is not configured. Please go to the Settings menu (top right) -> Secrets, ensure GEMINI_API_KEY is set (using your key or 'AI Studio Free Tier'), and click 'Apply changes'.");
   }
   return new GoogleGenAI({ apiKey });
 };
-
-const MODEL_NAME = "gemini-3-flash-preview";
 
 export const geminiService = {
   async analyzeThought(thought: string): Promise<ThoughtAnalysis> {
     const ai = getAI();
     const response = await ai.models.generateContent({
       model: MODEL_NAME,
-      contents: `Thought: "${thought}"\nYou are a thinking companion—human, calm, and supportive. Analyze this thought with depth and empathy.`,
+      contents: `Thought: "${thought}"\nYou are a human-like thinking companion. Analyze this thought with depth and empathy. Keep descriptions punchy and insightful. Max 25 words per field.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -102,7 +100,7 @@ export const geminiService = {
     
     const response = await ai.models.generateContent({
       model: MODEL_NAME,
-      contents: `Decision: "${question}"\n${optionsText}\nYou are a decision-making helper. Explore the trade-offs naturally.`,
+      contents: `Decision: "${question}"\n${optionsText}\nYou are a decision-making helper. Explore trade-offs naturally and concisely. Max 20 words per field.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -143,7 +141,7 @@ export const geminiService = {
     const ai = getAI();
     const response = await ai.models.generateContent({
       model: MODEL_NAME,
-      contents: `Problem: "${description}"\nYou are a problem-solving ally. Break it down into root causes and actionable solutions.`,
+      contents: `Problem: "${description}"\nYou are a problem-solving ally. Break it down into causes and solutions with extreme brevity. Max 15 words per bullet point.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {

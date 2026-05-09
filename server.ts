@@ -1,7 +1,6 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import analyzeHandler from "./api/analyze.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,16 +10,6 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
-
-  // API Routes
-  app.post("/api/analyze", async (req, res) => {
-    try {
-      await analyzeHandler(req, res);
-    } catch (err) {
-      console.error("API Error:", err);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  });
 
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
