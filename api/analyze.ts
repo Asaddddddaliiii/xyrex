@@ -8,7 +8,10 @@ export default async function handler(req: any, res: any) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
     console.error("GEMINI_API_KEY is missing or using placeholder value.");
-    return res.status(500).json({ error: "GEMINI_API_KEY is not configured on the server." });
+    return res.status(500).json({ 
+      error: "GEMINI_API_KEY is not configured.", 
+      details: "Please go to the Settings menu (top right) -> Secrets and confirm GEMINI_API_KEY is set. If not, add it."
+    });
   }
 
   const { type, input, options } = req.body;
@@ -19,7 +22,7 @@ export default async function handler(req: any, res: any) {
 
   try {
     const ai = new GoogleGenAI({ apiKey });
-    const modelName = "gemini-3-flash-preview";
+    const modelName = "gemini-1.5-flash";
     let result;
 
     switch (type) {
