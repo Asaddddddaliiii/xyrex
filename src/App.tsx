@@ -15,6 +15,8 @@ import { auth, db, handleFirestoreError, OperationType } from "./lib/firebase";
 import { onAuthStateChanged, signOut, User as FirebaseUser } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const Onboarding = ({ onComplete }: { onComplete: () => void }) => {
   const [step, setStep] = useState(0);
@@ -301,6 +303,8 @@ export default function App() {
           </main>
         </div>
       </div>
+      <Analytics />
+      <SpeedInsights />
     </ErrorBoundary>
   );
 }
